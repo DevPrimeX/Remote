@@ -1,0 +1,233 @@
+Act as a Senior Full-Stack Developer & System Architect.
+
+Build a complete, production-ready B2B website for a Plastic & Pharmaceutical Packaging Manufacturing Company (plastic caps, foils, trays, measuring cups, etc.). The project must include a full frontend, backend, hidden admin panel, and WhatsApp-based inquiry system.
+
+TECH STACK (MANDATORY):
+
+Frontend: Next.js 14 (App Router) + TypeScript
+
+Styling: Tailwind CSS
+
+Backend: Firebase v9 (Client SDK)
+
+Firebase Authentication
+
+Firestore Database
+
+Firebase Storage (product images)
+
+
+Deployment: Vercel-ready
+
+
+USER ROLES:
+
+1. Public Users (Customers)
+
+
+
+Browse products without login
+
+Search and filter products
+
+View product details
+
+Send inquiry via WhatsApp
+
+
+2. Admin (Hidden Panel)
+
+
+
+Secure login (email/password)
+
+Hidden routes (not visible in navbar)
+
+Add, edit, delete products
+
+Upload product images
+
+Manage inquiries
+
+
+FRONTEND STRUCTURE:
+
+HOME PAGE:
+
+Sticky header with logo, navigation, search bar
+
+“Send Inquiry” WhatsApp button
+
+Hero slider with product categories
+
+Sections: New Arrivals, Featured Products, Popular Products, About Company
+
+Footer with address, phone, email, quick links
+
+
+PRODUCT LISTING PAGE:
+
+Grid layout
+
+Product card with image, name, category
+
+“Enquiry on WhatsApp” button
+
+
+PRODUCT DETAIL PAGE:
+
+Image gallery
+
+Specification table (material, capacity, shape, weight, supply ability, delivery time)
+
+Buttons:
+
+Enquiry on WhatsApp
+
+Request Call Back
+
+
+
+WHATSAPP INQUIRY FLOW (IMPORTANT):
+
+On clicking “Enquiry on WhatsApp”, optionally open a modal with:
+
+Product image preview
+
+Product name
+
+Quantity input
+
+Unit selector (Pieces / Boxes)
+
+Optional message field
+
+
+Redirect user to WhatsApp with a pre-filled message
+
+
+WhatsApp URL format:
+https://wa.me/91XXXXXXXXXX?text=ENCODED_MESSAGE
+
+Example message:
+Hello,
+I am interested in the following product:
+
+Product: 25ml Measuring Cup
+Quantity: 1000 Pieces
+
+Please share price and delivery details.
+
+WHATSAPP NUMBER CONFIG:
+Create /lib/constants.ts
+Export:
+export const WHATSAPP_NUMBER = "91XXXXXXXXXX";
+
+ADMIN PANEL (HIDDEN):
+
+Route example: /admin/dashboard
+
+Protected using Firebase Auth
+
+Admin features:
+
+Dashboard stats (total products, inquiries)
+
+Add/Edit/Delete products
+
+Upload multiple product images
+
+Enable/disable WhatsApp inquiry per product
+
+
+
+FIRESTORE STRUCTURE:
+
+products collection:
+{
+name: string,
+category: string,
+description: string,
+specs: {
+material: string,
+capacity: string,
+shape: string,
+weight: string
+},
+images: string[],
+whatsappEnabled: boolean,
+createdAt: timestamp
+}
+
+inquiries collection (optional logging):
+{
+productId: string,
+productName: string,
+quantity: number,
+unit: string,
+createdAt: timestamp
+}
+
+FIREBASE CORE FILE:
+Create /lib/firebase.ts
+Initialize and export:
+
+auth
+
+db
+
+storage
+Use Firebase v9 modular syntax only.
+
+
+UI / UX RULES:
+
+Professional industrial B2B design
+
+Blue / white / dark gray color palette
+
+Mobile responsive
+
+Fast loading
+
+SEO friendly
+
+Clear call-to-action buttons
+
+
+PROJECT STRUCTURE:
+
+/app – frontend routes
+
+/components – reusable UI components
+
+/admin – hidden admin dashboard
+
+/lib – Firebase config and constants
+
+/styles – Tailwind setup
+
+
+OUTPUT REQUIREMENTS:
+
+Full working frontend
+
+Full backend integration
+
+WhatsApp inquiry redirect fully working
+
+Secure hidden admin panel
+
+Real Firestore CRUD
+
+Image upload via Firebase Storage
+
+Production-ready code
+
+No pseudo-code
+
+No placeholders
+
+
+FINAL INSTRUCTION:
+Generate the complete project code, file-by-file, following best practices and real-world B2B standards.
