@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "@/hooks/use-products";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -7,11 +7,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Pencil, Trash2, Search, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, Upload, X } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertProductSchema, type Product } from "@shared/schema";
 import { z } from "zod";
+import { useDropzone } from "react-dropzone";
 
 // Admin page needs to verify auth
 export default function AdminDashboard() {
@@ -194,6 +195,31 @@ function ProductDialog({ open, onOpenChange, product }: { open: boolean, onOpenC
 
   const isPending = createProduct.isPending || updateProduct.isPending;
 
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    // In a real app, you'd upload these to a server. 
+    // For this demo, we'll convert to base64 or object URLs
+    acceptedFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        const currentImages = form.getValues("images");
+        form.setValue("images", currentImages ? `${currentImages}, ${base64}` : base64);
+      };
+      reader.readAsDataURL(file);
+    });
+  }, [form]);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
+    onDrop,
+    accept: { 'image/*': [] }
+  });
+
+  const removeImage = (index: number) => {
+    const images = form.getValues("images").split(",").map(s => s.trim()).filter(Boolean);
+    images.splice(index, 1);
+    form.setValue("images", images.join(", "));
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -218,9 +244,39 @@ function ProductDialog({ open, onOpenChange, product }: { open: boolean, onOpenC
           </div>
 
           <div className="space-y-2">
-            <Label>Images (Comma separated URLs)</Label>
-            <Input {...form.register("images")} placeholder="https://..., https://..." />
-            <p className="text-xs text-slate-500">For now, paste image URLs. Upload feature coming soon.</p>
+            <Label>Images</Label>
+            <div 
+              {...getRootProps()} 
+              className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                isDragActive ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-primary'
+              }`}
+            >
+              <input {...getInputProps()} />
+              <Upload className="mx-auto h-8 w-8 text-slate-400 mb-2" />
+              <p className="text-sm text-slate-600">
+                {isDragActive ? "Drop images here..." : "Drag & drop images here, or click to select"}
+              </p>
+            </div>
+            
+            <div className="mt-4 grid grid-cols-4 gap-2">
+              {form.watch("images")?.split(",").map(s => s.trim()).filter(Boolean).map((img, idx) => (
+                <div key={idx} className="relative group aspect-square rounded overflow-hidden border">
+                  <img src={img} className="w-full h-full object-cover" alt={`preview-${idx}`} />
+                  <button 
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-2">
+              <Label className="text-xs text-slate-500">Manual URLs (Comma separated)</Label>
+              <Input {...form.register("images")} placeholder="https://..." className="mt-1 h-8 text-xs" />
+            </div>
           </div>
 
           <div className="space-y-2 border p-4 rounded bg-slate-50">

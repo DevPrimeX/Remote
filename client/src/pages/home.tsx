@@ -63,21 +63,27 @@ export default function HomePage() {
       {/* Features Grid */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-8 border border-slate-100 bg-slate-50/50 hover:shadow-lg transition-shadow group">
-              <ShieldCheck className="w-12 h-12 text-primary mb-6 group-hover:scale-110 transition-transform" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div className="p-8 border border-slate-100 bg-slate-50/50 hover-elevate transition-shadow group rounded-md">
+              <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <ShieldCheck className="w-10 h-10 text-primary" />
+              </div>
               <h3 className="text-xl font-bold mb-4">Certified Quality</h3>
-              <p className="text-slate-600">ISO 9001:2015 certified manufacturing process ensuring consistent top-tier quality.</p>
+              <p className="text-slate-600">ISO 9001:2015 certified manufacturing process ensuring consistent top-tier quality standards for every batch.</p>
             </div>
-            <div className="p-8 border border-slate-100 bg-slate-50/50 hover:shadow-lg transition-shadow group">
-              <Truck className="w-12 h-12 text-primary mb-6 group-hover:scale-110 transition-transform" />
+            <div className="p-8 border border-slate-100 bg-slate-50/50 hover-elevate transition-shadow group rounded-md">
+              <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <Truck className="w-10 h-10 text-primary" />
+              </div>
               <h3 className="text-xl font-bold mb-4">Fast Delivery</h3>
-              <p className="text-slate-600">Efficient logistics network ensuring timely delivery across the country.</p>
+              <p className="text-slate-600">Efficient logistics network with real-time tracking, ensuring timely delivery across the country in 2-5 business days.</p>
             </div>
-            <div className="p-8 border border-slate-100 bg-slate-50/50 hover:shadow-lg transition-shadow group">
-              <ThumbsUp className="w-12 h-12 text-primary mb-6 group-hover:scale-110 transition-transform" />
+            <div className="p-8 border border-slate-100 bg-slate-50/50 hover-elevate transition-shadow group rounded-md">
+              <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <ThumbsUp className="w-10 h-10 text-primary" />
+              </div>
               <h3 className="text-xl font-bold mb-4">Wholesale Pricing</h3>
-              <p className="text-slate-600">Direct-from-factory pricing providing the best value for your business.</p>
+              <p className="text-slate-600">Direct-from-factory pricing tiers that scale with your volume, providing the best value and margins for your business.</p>
             </div>
           </div>
         </div>
