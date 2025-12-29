@@ -14,6 +14,8 @@ import { insertProductSchema, type Product } from "@shared/schema";
 import { z } from "zod";
 import { useDropzone } from "react-dropzone";
 
+import { useUpload } from "@/hooks/use-upload";
+
 // Admin page needs to verify auth
 export default function AdminDashboard() {
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -121,6 +123,7 @@ function ProductManager() {
 function ProductDialog({ open, onOpenChange, product }: { open: boolean, onOpenChange: (open: boolean) => void, product: Product | null }) {
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
+  const { uploadFile, isUploading } = useUpload();
 
   // Extend schema to handle array of specs for the form UI (then convert to object)
   const formSchema = z.object({
@@ -195,21 +198,21 @@ function ProductDialog({ open, onOpenChange, product }: { open: boolean, onOpenC
     }
   };
 
-  const isPending = createProduct.isPending || updateProduct.isPending;
+  const isPending = createProduct.isPending || updateProduct.isPending || isUploading;
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    // In a real app, you'd upload these to a server. 
-    // For this demo, we'll convert to base64 or object URLs
-    acceptedFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result as string;
-        const currentImages = form.getValues("images");
-        form.setValue("images", currentImages ? `${currentImages}, ${base64}` : base64);
-      };
-      reader.readAsDataURL(file);
-    });
-  }, [form]);
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    for (const file of acceptedFiles) {
+      try {
+        const response = await uploadFile(file);
+        if (response) {
+          const currentImages = form.getValues("images");
+          form.setValue("images", currentImages ? `${currentImages}, ${response.objectPath}` : response.objectPath);
+        }
+      } catch (error) {
+        console.error("Upload error:", error);
+      }
+    }
+  }, [form, uploadFile]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
     onDrop,

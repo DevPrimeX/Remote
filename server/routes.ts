@@ -5,11 +5,16 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { setupAuth, hashPassword } from "./auth";
 
+import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
   
+  // Register object storage routes
+  registerObjectStorageRoutes(app);
+
   // Setup Authentication (Passport session)
   setupAuth(app);
 
