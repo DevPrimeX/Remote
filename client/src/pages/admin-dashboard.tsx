@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "@/hooks/use-products";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -148,25 +148,27 @@ function ProductDialog({ open, onOpenChange, product }: { open: boolean, onOpenC
   });
 
   // Reset form when dialog opens/closes or product changes
-  useState(() => {
-    if (product) {
-      form.reset({
-        name: product.name,
-        category: product.category,
-        description: product.description,
-        images: product.images.join(", "),
-        specs: Object.entries(product.specs as Record<string, string>).map(([key, value]) => ({ key, value }))
-      });
-    } else {
-      form.reset({
-        name: "",
-        category: "",
-        description: "",
-        images: "",
-        specs: [{ key: "Material", value: "" }, { key: "Capacity", value: "" }]
-      });
+  useEffect(() => {
+    if (open) {
+      if (product) {
+        form.reset({
+          name: product.name,
+          category: product.category,
+          description: product.description,
+          images: product.images.join(", "),
+          specs: Object.entries(product.specs as Record<string, string>).map(([key, value]) => ({ key, value }))
+        });
+      } else {
+        form.reset({
+          name: "",
+          category: "",
+          description: "",
+          images: "",
+          specs: [{ key: "Material", value: "" }, { key: "Capacity", value: "" }]
+        });
+      }
     }
-  });
+  }, [open, product, form]);
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     // Transform specs array back to object
