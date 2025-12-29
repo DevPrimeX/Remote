@@ -61,13 +61,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
-    const [product] = await db.insert(products).values(insertProduct).returning();
+    const [product] = await db.insert(products).values({
+      ...insertProduct,
+      specs: insertProduct.specs as any
+    }).returning();
     return product;
   }
 
   async updateProduct(id: number, updates: Partial<InsertProduct>): Promise<Product> {
     const [product] = await db.update(products)
-      .set(updates)
+      .set({
+        ...updates,
+        specs: updates.specs ? (updates.specs as any) : undefined
+      })
       .where(eq(products.id, id))
       .returning();
     return product;
