@@ -50,6 +50,15 @@ export function registerObjectStorageRoutes(app: Express): void {
       // Extract object path from the presigned URL for later reference
       const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
 
+      // Set ACL policy to public for immediate access
+      try {
+        await objectStorageService.trySetObjectEntityAclPolicy(uploadURL, {
+          visibility: "public",
+        });
+      } catch (aclError) {
+        console.warn("Failed to set ACL policy during request-url:", aclError);
+      }
+
       res.json({
         uploadURL,
         objectPath,

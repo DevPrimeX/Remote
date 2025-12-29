@@ -205,8 +205,9 @@ function ProductDialog({ open, onOpenChange, product }: { open: boolean, onOpenC
       try {
         const response = await uploadFile(file);
         if (response) {
+          const publicUrl = window.location.origin + response.objectPath;
           const currentImages = form.getValues("images");
-          form.setValue("images", currentImages ? `${currentImages}, ${response.objectPath}` : response.objectPath);
+          form.setValue("images", currentImages ? `${currentImages}, ${publicUrl}` : publicUrl);
         }
       } catch (error) {
         console.error("Upload error:", error);
