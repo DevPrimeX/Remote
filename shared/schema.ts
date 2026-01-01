@@ -14,7 +14,6 @@ export const products = pgTable("products", {
   name: text("name").notNull(),
   category: text("category").notNull(),
   description: text("description").notNull(),
-  // Specs: material, capacity, shape, weight, supply ability, delivery time
   specs: jsonb("specs").$type<{
     material?: string;
     capacity?: string;
@@ -29,12 +28,19 @@ export const products = pgTable("products", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const categories = pgTable("categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  image: text("image"),
+  isHomePage: boolean("is_home_page").default(false),
+});
+
 export const inquiries = pgTable("inquiries", {
   id: serial("id").primaryKey(),
   productId: integer("product_id").references(() => products.id),
   productName: text("product_name").notNull(),
   quantity: integer("quantity").notNull(),
-  unit: text("unit").notNull(), // Pieces / Boxes
+  unit: text("unit").notNull(),
   message: text("message"),
   status: text("status").default("new"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -43,6 +49,7 @@ export const inquiries = pgTable("inquiries", {
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true });
 export const insertInquirySchema = createInsertSchema(inquiries).omit({ id: true, createdAt: true });
+export const insertCategorySchema = createInsertSchema(categories).omit({ id: true });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -50,3 +57,5 @@ export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Inquiry = typeof inquiries.$inferSelect;
 export type InsertInquiry = z.infer<typeof insertInquirySchema>;
+export type Category = typeof categories.$inferSelect;
+export type InsertCategory = z.infer<typeof insertCategorySchema>;

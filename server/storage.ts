@@ -1,9 +1,10 @@
 import { db } from "./db";
 import {
-  users, products, inquiries,
+  users, products, inquiries, categories,
   type User, type InsertUser,
   type Product, type InsertProduct,
-  type Inquiry, type InsertInquiry
+  type Inquiry, type InsertInquiry,
+  type Category, type InsertCategory
 } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
@@ -23,6 +24,12 @@ export interface IStorage {
   // Inquiries
   getInquiries(): Promise<Inquiry[]>;
   createInquiry(inquiry: InsertInquiry): Promise<Inquiry>;
+
+  // Categories
+  getCategories(): Promise<Category[]>;
+  createCategory(category: InsertCategory): Promise<Category>;
+  updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category>;
+  deleteCategory(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -41,17 +48,12 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getProducts(category?: string, search?: string): Promise<Product[]> {
+  async getProducts(category?: string, _search?: string): Promise<Product[]> {
     let query = db.select().from(products);
-    
-    // Simple filtering - in a real app use `and()` for multiple conditions
     if (category) {
-      // @ts-ignore - straightforward dynamic query construction
-      query = query.where(eq(products.category, category));
+      const results = await query.where(eq(products.category, category)).orderBy(desc(products.createdAt));
+      return results;
     }
-    
-    // Search could be implemented with ilike, keeping it simple for now or adding if needed
-    
     return await query.orderBy(desc(products.createdAt));
   }
 
@@ -76,6 +78,7 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(products.id, id))
       .returning();
+    if (!product) throw new Error("Product not found");
     return product;
   }
 
@@ -90,6 +93,28 @@ export class DatabaseStorage implements IStorage {
   async createInquiry(insertInquiry: InsertInquiry): Promise<Inquiry> {
     const [inquiry] = await db.insert(inquiries).values(insertInquiry).returning();
     return inquiry;
+  }
+
+  async getCategories(): Promise<Category[]> {
+    return await db.select().from(categories);
+  }
+
+  async createCategory(insertCategory: InsertCategory): Promise<Category> {
+    const [category] = await db.insert(categories).values(insertCategory).returning();
+    return category;
+  }
+
+  async updateCategory(id: number, updates: Partial<InsertCategory>): Promise<Category> {
+    const [category] = await db.update(categories)
+      .set(updates)
+      .where(eq(categories.id, id))
+      .returning();
+    if (!category) throw new Error("Category not found");
+    return category;
+  }
+
+  async deleteCategory(id: number): Promise<void> {
+    await db.delete(categories).where(eq(categories.id, id));
   }
 }
 

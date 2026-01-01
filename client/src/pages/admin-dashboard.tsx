@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "@/hooks/use-products";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -7,16 +7,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Pencil, Trash2, Search, Loader2, Upload, X } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Plus, Pencil, Trash2, Search, Loader2, LayoutDashboard, Tag } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProductSchema, type Product } from "@shared/schema";
+import { insertCategorySchema, type Product, type Category } from "@shared/schema";
 import { z } from "zod";
-import { useDropzone } from "react-dropzone";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
-import { useUpload } from "@/hooks/use-upload";
-
-// Admin page needs to verify auth
 export default function AdminDashboard() {
   const { user, isLoading: isAuthLoading } = useAuth();
   
@@ -30,15 +31,148 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-slate-50 pb-20">
       <div className="bg-white border-b py-8 mb-8">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold font-display text-slate-900">PRODUCT MANAGEMENT</h1>
-          <p className="text-slate-500">Manage your catalog and specifications.</p>
+          <h1 className="text-3xl font-bold font-display text-slate-900 uppercase tracking-tighter">Admin Dashboard</h1>
+          <p className="text-slate-500">Manage products and categories.</p>
         </div>
       </div>
       
       <div className="container mx-auto px-4">
-        <ProductManager />
+        <Tabs defaultValue="products" className="space-y-6">
+          <TabsList className="bg-white border p-1 h-auto">
+            <TabsTrigger value="products" className="flex items-center gap-2 py-2 px-4">
+              <LayoutDashboard className="h-4 w-4" />
+              Products
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="flex items-center gap-2 py-2 px-4">
+              <Tag className="h-4 w-4" />
+              Categories
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="products">
+            <ProductManager />
+          </TabsContent>
+
+          <TabsContent value="categories">
+            <CategoryManager />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
+  );
+}
+
+function CategoryManager() {
+  const { data: categories, isLoading } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/categories/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      toast({ title: "Category deleted" });
+    }
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">Category Management</h2>
+        <Button onClick={() => { setEditingCategory(null); setIsDialogOpen(true); }}>
+          <Plus className="mr-2 h-4 w-4" /> Add Category
+        </Button>
+      </div>
+
+      <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Image</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Home Page</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+               <TableRow><TableCell colSpan={4} className="text-center py-8">Loading...</TableCell></TableRow>
+            ) : categories?.map((cat) => (
+              <TableRow key={cat.id}>
+                <TableCell>
+                  <img src={cat.image || ""} className="w-12 h-12 rounded object-cover bg-slate-100" alt="thumb" />
+                </TableCell>
+                <TableCell className="font-medium">{cat.name}</TableCell>
+                <TableCell>{cat.isHomePage ? "Yes" : "No"}</TableCell>
+                <TableCell className="text-right space-x-2">
+                  <Button variant="ghost" size="sm" onClick={() => { setEditingCategory(cat); setIsDialogOpen(true); }}>
+                    <Pencil className="h-4 w-4 text-blue-500" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => { if(confirm("Delete?")) deleteMutation.mutate(cat.id); }}>
+                    <Trash2 className="h-4 w-4 text-red-500" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <CategoryDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} category={editingCategory} />
+    </div>
+  );
+}
+
+function CategoryDialog({ open, onOpenChange, category }: { open: boolean, onOpenChange: (open: boolean) => void, category: Category | null }) {
+  const { toast } = useToast();
+  const form = useForm({
+    resolver: zodResolver(insertCategorySchema),
+    defaultValues: { name: "", image: "", isHomePage: false }
+  });
+
+  useEffect(() => {
+    if (open) {
+      if (category) form.reset({ name: category.name, image: category.image || "", isHomePage: !!category.isHomePage });
+      else form.reset({ name: "", image: "", isHomePage: false });
+    }
+  }, [open, category, form]);
+
+  const mutation = useMutation({
+    mutationFn: async (data: any) => {
+      if (category) await apiRequest("PATCH", `/api/categories/${category.id}`, data);
+      else await apiRequest("POST", "/api/categories", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      onOpenChange(false);
+      toast({ title: "Success" });
+    }
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>{category ? "Edit Category" : "Add Category"}</DialogTitle></DialogHeader>
+        <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Name</Label>
+            <Input {...form.register("name")} />
+          </div>
+          <div className="space-y-2">
+            <Label>Image URL (ImgBB)</Label>
+            <Input {...form.register("image")} placeholder="https://..." />
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch checked={form.watch("isHomePage")} onCheckedChange={(v) => form.setValue("isHomePage", v)} />
+            <Label>Show on Home</Label>
+          </div>
+          <Button type="submit" className="w-full" disabled={mutation.isPending}>Save</Button>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -49,23 +183,12 @@ function ProductManager() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleDelete = async (id: number) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      deleteProduct.mutate(id);
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center gap-4">
         <div className="relative max-w-sm w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input 
-            placeholder="Search products..." 
-            className="pl-10 bg-white" 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <Input placeholder="Search products..." className="pl-10 bg-white" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Button onClick={() => { setEditingProduct(null); setIsDialogOpen(true); }}>
           <Plus className="mr-2 h-4 w-4" /> Add Product
@@ -79,28 +202,24 @@ function ProductManager() {
               <TableHead>Image</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Specs</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-               <TableRow><TableCell colSpan={5} className="text-center py-8">Loading...</TableCell></TableRow>
+               <TableRow><TableCell colSpan={4} className="text-center py-8">Loading...</TableCell></TableRow>
             ) : products?.map((product) => (
               <TableRow key={product.id}>
                 <TableCell>
                   <img src={product.images[0] || ""} className="w-12 h-12 rounded object-cover bg-slate-100" alt="thumb" />
                 </TableCell>
-                <TableCell className="font-medium">{product.name}</TableCell>
+                <TableCell className="font-medium uppercase tracking-tight">{product.name}</TableCell>
                 <TableCell>{product.category}</TableCell>
-                <TableCell className="text-xs text-slate-500 max-w-xs truncate">
-                  {Object.keys(product.specs as object).join(", ")}
-                </TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button variant="ghost" size="sm" onClick={() => { setEditingProduct(product); setIsDialogOpen(true); }}>
                     <Pencil className="h-4 w-4 text-blue-500" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(product.id)}>
+                  <Button variant="ghost" size="sm" onClick={() => { if(confirm("Delete?")) deleteProduct.mutate(product.id); }}>
                     <Trash2 className="h-4 w-4 text-red-500" />
                   </Button>
                 </TableCell>
@@ -110,47 +229,27 @@ function ProductManager() {
         </Table>
       </div>
 
-      <ProductDialog 
-        open={isDialogOpen} 
-        onOpenChange={setIsDialogOpen} 
-        product={editingProduct} 
-      />
+      <ProductDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} product={editingProduct} />
     </div>
   );
 }
 
-// Separate form component for cleaner code
+interface FormValues {
+  name: string;
+  category: string;
+  description: string;
+  images: string;
+  specs: { key: string; value: string; }[];
+}
+
 function ProductDialog({ open, onOpenChange, product }: { open: boolean, onOpenChange: (open: boolean) => void, product: Product | null }) {
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
-  const { uploadFile, isUploading } = useUpload();
-
-  // Extend schema to handle array of specs for the form UI (then convert to object)
-  const formSchema = z.object({
-    name: z.string().min(1),
-    category: z.string().min(1),
-    description: z.string().min(1),
-    images: z.string(), // comma separated string for simple input
-    specs: z.array(z.object({ key: z.string(), value: z.string() })),
+  const form = useForm<FormValues>({
+    defaultValues: { name: "", category: "", description: "", images: "", specs: [] }
   });
+  const { fields, append, remove } = useFieldArray({ control: form.control, name: "specs" });
 
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      category: "",
-      description: "",
-      images: "",
-      specs: [{ key: "Material", value: "" }, { key: "Capacity", value: "" }]
-    }
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "specs"
-  });
-
-  // Reset form when dialog opens/closes or product changes
   useEffect(() => {
     if (open) {
       if (product) {
@@ -162,150 +261,52 @@ function ProductDialog({ open, onOpenChange, product }: { open: boolean, onOpenC
           specs: Object.entries(product.specs as Record<string, string>).map(([key, value]) => ({ key, value }))
         });
       } else {
-        form.reset({
-          name: "",
-          category: "",
-          description: "",
-          images: "",
-          specs: [{ key: "Material", value: "" }, { key: "Capacity", value: "" }]
-        });
+        form.reset({ name: "", category: "", description: "", images: "", specs: [] });
       }
     }
   }, [open, product, form]);
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    // Transform specs array back to object
-    const specsObject = data.specs.reduce((acc, curr) => {
+  const onSubmit = (data: FormValues) => {
+    const specs = data.specs.reduce((acc: Record<string, string>, curr) => {
       if (curr.key && curr.value) acc[curr.key] = curr.value;
       return acc;
-    }, {} as Record<string, string>);
-
+    }, {});
     const payload = {
       ...data,
       images: data.images.split(",").map(s => s.trim()).filter(Boolean),
-      specs: specsObject,
+      specs,
       whatsappEnabled: true
     };
-
-    if (product) {
-      updateProduct.mutate({ id: product.id, ...payload }, {
-        onSuccess: () => onOpenChange(false)
-      });
-    } else {
-      createProduct.mutate(payload, {
-        onSuccess: () => onOpenChange(false)
-      });
-    }
-  };
-
-  const isPending = createProduct.isPending || updateProduct.isPending || isUploading;
-
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    for (const file of acceptedFiles) {
-      try {
-        const response = await uploadFile(file);
-        if (response) {
-          const publicUrl = window.location.origin + response.objectPath;
-          const currentImages = form.getValues("images");
-          form.setValue("images", currentImages ? `${currentImages}, ${publicUrl}` : publicUrl);
-        }
-      } catch (error) {
-        console.error("Upload error:", error);
-      }
-    }
-  }, [form, uploadFile]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
-    onDrop,
-    accept: { 'image/*': [] }
-  });
-
-  const removeImage = (index: number) => {
-    const images = form.getValues("images").split(",").map(s => s.trim()).filter(Boolean);
-    images.splice(index, 1);
-    form.setValue("images", images.join(", "));
+    if (product) updateProduct.mutate({ id: product.id, ...payload }, { onSuccess: () => onOpenChange(false) });
+    else createProduct.mutate(payload, { onSuccess: () => onOpenChange(false) });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{product ? "Edit Product" : "Add New Product"}</DialogTitle>
-        </DialogHeader>
+        <DialogHeader><DialogTitle>{product ? "Edit Product" : "Add Product"}</DialogTitle></DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Name</Label>
-              <Input {...form.register("name")} />
-            </div>
-            <div className="space-y-2">
-              <Label>Category</Label>
-              <Input {...form.register("category")} placeholder="e.g. Containers" />
-            </div>
-          </div>
-          
+          <Input {...form.register("name")} placeholder="Product Name" />
+          <Input {...form.register("category")} placeholder="Category" />
+          <Textarea {...form.register("description")} placeholder="Description" />
           <div className="space-y-2">
-            <Label>Description</Label>
-            <Textarea {...form.register("description")} />
+            <Label>Image URLs (ImgBB, comma-separated)</Label>
+            <Input {...form.register("images")} placeholder="https://..." />
           </div>
-
-          <div className="space-y-2">
-            <Label>Images</Label>
-            <div 
-              {...getRootProps()} 
-              className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                isDragActive ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-primary'
-              }`}
-            >
-              <input {...getInputProps()} />
-              <Upload className="mx-auto h-8 w-8 text-slate-400 mb-2" />
-              <p className="text-sm text-slate-600">
-                {isDragActive ? "Drop images here..." : "Drag & drop images here, or click to select"}
-              </p>
-            </div>
-            
-            <div className="mt-4 grid grid-cols-4 gap-2">
-              {form.watch("images")?.split(",").map(s => s.trim()).filter(Boolean).map((img, idx) => (
-                <div key={idx} className="relative group aspect-square rounded overflow-hidden border">
-                  <img src={img} className="w-full h-full object-cover" alt={`preview-${idx}`} />
-                  <button 
-                    type="button"
-                    onClick={() => removeImage(idx)}
-                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-2">
-              <Label className="text-xs text-slate-500">Manual URLs (Comma separated)</Label>
-              <Input {...form.register("images")} placeholder="https://..." className="mt-1 h-8 text-xs" />
-            </div>
-          </div>
-
           <div className="space-y-2 border p-4 rounded bg-slate-50">
             <div className="flex justify-between items-center mb-2">
               <Label>Specifications</Label>
-              <Button type="button" variant="outline" size="sm" onClick={() => append({ key: "", value: "" })}>
-                <Plus className="h-3 w-3 mr-1" /> Add Spec
-              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => append({ key: "", value: "" })}>Add Spec</Button>
             </div>
             {fields.map((field, index) => (
               <div key={field.id} className="flex gap-2 mb-2">
-                <Input {...form.register(`specs.${index}.key`)} placeholder="Key (e.g. Color)" className="w-1/3" />
-                <Input {...form.register(`specs.${index}.value`)} placeholder="Value (e.g. White)" className="w-full" />
-                <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
+                <Input {...form.register(`specs.${index}.key` as const)} placeholder="Key" />
+                <Input {...form.register(`specs.${index}.value` as const)} placeholder="Value" />
+                <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
               </div>
             ))}
           </div>
-
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? <Loader2 className="animate-spin" /> : (product ? "Save Changes" : "Create Product")}
-          </Button>
+          <Button type="submit" className="w-full" disabled={createProduct.isPending || updateProduct.isPending}>Save</Button>
         </form>
       </DialogContent>
     </Dialog>

@@ -3,6 +3,8 @@ import { Link, useLocation } from "wouter";
 import { Menu, X, Phone, User, Package, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { type Category } from "@shared/schema";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +33,7 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/admin/dashboard" className="text-primary">DASHBOARD</Link>
+              <Link href="/admin/dashboard" className="text-primary font-bold">DASHBOARD</Link>
               <Link href="/" className="hover:text-primary transition-colors">VIEW SITE</Link>
             </>
           )}
@@ -79,6 +81,8 @@ export function Navbar() {
 }
 
 export function Footer() {
+  const { data: categories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
+
   return (
     <footer className="bg-slate-900 text-slate-200 mt-24">
       <div className="container mx-auto px-4 py-12">
@@ -107,9 +111,20 @@ export function Footer() {
           <div>
             <h4 className="text-white text-lg mb-4">Categories</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/products?category=Containers" className="hover:text-primary transition-colors">Plastic Containers</Link></li>
-              <li><Link href="/products?category=Trays" className="hover:text-primary transition-colors">Serving Trays</Link></li>
-              <li><Link href="/products?category=Foils" className="hover:text-primary transition-colors">Aluminum Foils</Link></li>
+              {categories?.slice(0, 5).map(cat => (
+                <li key={cat.id}>
+                  <Link href={`/products?category=${cat.name}`} className="hover:text-primary transition-colors">
+                    {cat.name}
+                  </Link>
+                </li>
+              ))}
+              {!categories && (
+                <>
+                  <li><Link href="/products?category=Containers" className="hover:text-primary transition-colors">Plastic Containers</Link></li>
+                  <li><Link href="/products?category=Trays" className="hover:text-primary transition-colors">Serving Trays</Link></li>
+                  <li><Link href="/products?category=Foils" className="hover:text-primary transition-colors">Aluminum Foils</Link></li>
+                </>
+              )}
             </ul>
           </div>
 
