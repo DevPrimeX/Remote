@@ -137,8 +137,9 @@ export function Footer() {
           </div>
         </div>
         
-        <div className="border-t border-slate-800 mt-12 pt-8 text-center text-sm text-slate-500">
-          © {new Date().getFullYear()} Ritesh Plastic. All rights reserved.
+        <div className="border-t border-slate-800 mt-12 pt-8 text-center text-sm text-slate-500 space-y-2">
+          <p>© {new Date().getFullYear()} Ritesh Plastic. All rights reserved.</p>
+          <p className="text-slate-600">Developed with ❤️ by Naresh</p>
         </div>
       </div>
     </footer>
