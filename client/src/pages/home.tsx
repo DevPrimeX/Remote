@@ -6,9 +6,14 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ShieldCheck, Truck, ThumbsUp } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
+import { useQuery } from "@tanstack/react-query";
+import { type Category } from "@shared/schema";
 
 export default function HomePage() {
   const { data: featuredProducts, isLoading } = useProducts({ search: "" });
+  const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({ 
+    queryKey: ["/api/categories"] 
+  });
   const [emblaRef] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 5000 })]);
 
   return (
@@ -93,23 +98,28 @@ export default function HomePage() {
       <section className="py-24 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-slate-900">OUR CATEGORIES</h2>
-            <div className="h-1 w-20 bg-primary mx-auto" />
+            <h2 className="text-4xl font-bold mb-4 text-slate-900 tracking-tighter">OUR PRODUCT CATEGORIES</h2>
+            <div className="h-2 w-20 bg-primary mx-auto" />
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {['Containers', 'Trays', 'Foils'].map((cat) => (
-              <Link key={cat} href={`/products?category=${cat}`}>
-                <div className="group relative h-80 overflow-hidden cursor-pointer bg-slate-900">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {categoriesLoading ? (
+              [1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-80 bg-slate-200 animate-pulse rounded-lg" />
+              ))
+            ) : categories?.map((cat) => (
+              <Link key={cat.id} href={`/products?category=${cat.name}`}>
+                <div className="group relative h-80 overflow-hidden cursor-pointer bg-slate-900 rounded-xl shadow-lg border border-slate-200">
                   <img 
-                    src={`https://placehold.co/600x800/1e293b/ffffff?text=${cat}`} 
-                    alt={cat}
-                    className="w-full h-full object-cover opacity-70 group-hover:scale-110 transition-transform duration-700"
+                    src={cat.image || `https://placehold.co/600x800/1e293b/ffffff?text=${cat.name}`} 
+                    alt={cat.name}
+                    className="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-700"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <h3 className="text-3xl font-bold text-white border-4 border-white px-6 py-3 uppercase tracking-widest group-hover:bg-white group-hover:text-slate-900 transition-colors">
-                      {cat}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                    <h3 className="text-2xl font-display font-bold text-white uppercase tracking-widest mb-4 group-hover:scale-110 transition-transform duration-500">
+                      {cat.name}
                     </h3>
+                    <div className="h-1 w-0 group-hover:w-16 bg-primary transition-all duration-500" />
                   </div>
                 </div>
               </Link>
