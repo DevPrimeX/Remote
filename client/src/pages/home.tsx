@@ -19,45 +19,50 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative h-[600px] overflow-hidden bg-slate-900 text-white">
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900 to-slate-900/40 z-10" />
+      <section className="relative min-h-[85vh] lg:h-[600px] overflow-hidden bg-slate-900 text-white flex items-center">
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-slate-900 z-10" />
         
         {/* Background Image Slider */}
         <div className="absolute inset-0 z-0" ref={emblaRef}>
           <div className="flex h-full">
             <div className="flex-[0_0_100%] min-w-0 relative">
-               {/* HTML Comment: Industrial Warehouse Background */}
-               <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-50" alt="Factory" />
+               <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-40 scale-105" alt="Factory" />
             </div>
             <div className="flex-[0_0_100%] min-w-0 relative">
-               {/* HTML Comment: Product Quality Close-up */}
-               <img src="https://images.unsplash.com/photo-1626176395349-8e50b16f195d?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-50" alt="Packaging" />
+               <img src="https://images.unsplash.com/photo-1626176395349-8e50b16f195d?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-40 scale-105" alt="Packaging" />
             </div>
           </div>
         </div>
 
-        <div className="relative z-20 container mx-auto px-4 h-full flex flex-col justify-center">
+        <div className="relative z-20 container mx-auto px-4 py-20 lg:py-0">
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-2xl"
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="max-w-3xl"
           >
-            <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 leading-tight tracking-tighter">
-              RITESH <span className="text-primary">PLASTIC</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 border border-primary/30 text-primary-foreground text-sm font-medium mb-6 backdrop-blur-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              ISO 9001:2015 Certified Manufacturer
+            </div>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold mb-6 leading-[0.9] tracking-tighter">
+              RITESH <span className="text-primary italic">PLASTIC</span>
             </h1>
-            <p className="text-xl md:text-2xl text-slate-300 mb-8 font-light max-w-xl">
-              Leading manufacturer of high-quality pharmaceutical and industrial plastic packaging solutions in Baddi.
+            <p className="text-lg md:text-2xl text-slate-300 mb-10 font-light max-w-xl leading-relaxed">
+              Precision-engineered pharmaceutical and industrial plastic packaging solutions. Manufacturing excellence in the heart of Baddi.
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/products">
-                <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8 h-14 rounded-none">
-                  Explore Products <ArrowRight className="ml-2" />
+                <Button size="lg" className="w-full sm:w-auto text-lg px-10 h-14 rounded-full shadow-lg shadow-primary/20">
+                  Browse Catalog <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link href="/contact">
-                <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-slate-900 text-lg px-8 h-14 rounded-none">
-                  Contact Sales
+                <Button size="lg" variant="outline" className="w-full sm:w-auto text-white border-white/30 hover:bg-white/10 backdrop-blur-md text-lg px-10 h-14 rounded-full">
+                  Request Quote
                 </Button>
               </Link>
             </div>
@@ -66,30 +71,44 @@ export default function HomePage() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-20 bg-white">
+      <section className="py-24 bg-white relative">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div className="p-8 border border-slate-100 bg-slate-50/50 hover-elevate transition-shadow group rounded-md">
-              <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <ShieldCheck className="w-10 h-10 text-primary" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="p-10 border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-300 group rounded-2xl relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary transition-all" />
+              <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-white transition-colors duration-500">
+                <ShieldCheck className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Certified Quality</h3>
-              <p className="text-slate-600">ISO 9001:2015 certified manufacturing process ensuring consistent top-tier quality standards for every batch.</p>
-            </div>
-            <div className="p-8 border border-slate-100 bg-slate-50/50 hover-elevate transition-shadow group rounded-md">
-              <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <Truck className="w-10 h-10 text-primary" />
+              <h3 className="text-2xl font-bold mb-4 tracking-tight">Certified Quality</h3>
+              <p className="text-slate-600 leading-relaxed text-lg">Rigorous quality control systems ensuring pharmaceutical-grade standards for every production run.</p>
+            </motion.div>
+
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="p-10 border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-300 group rounded-2xl relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary transition-all" />
+              <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-white transition-colors duration-500">
+                <Truck className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Fast Delivery</h3>
-              <p className="text-slate-600">Efficient logistics network with real-time tracking, ensuring timely delivery across the country in 2-5 business days.</p>
-            </div>
-            <div className="p-8 border border-slate-100 bg-slate-50/50 hover-elevate transition-shadow group rounded-md">
-              <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <ThumbsUp className="w-10 h-10 text-primary" />
+              <h3 className="text-2xl font-bold mb-4 tracking-tight">Rapid Logistics</h3>
+              <p className="text-slate-600 leading-relaxed text-lg">Optimized supply chain management providing reliable delivery timelines across all industrial hubs.</p>
+            </motion.div>
+
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="p-10 border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-300 group rounded-2xl relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary transition-all" />
+              <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-white transition-colors duration-500">
+                <ThumbsUp className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Wholesale Pricing</h3>
-              <p className="text-slate-600">Direct-from-factory pricing tiers that scale with your volume, providing the best value and margins for your business.</p>
-            </div>
+              <h3 className="text-2xl font-bold mb-4 tracking-tight">Direct Pricing</h3>
+              <p className="text-slate-600 leading-relaxed text-lg">Competitive wholesale factory rates with transparent volume-based discount structures.</p>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -97,29 +116,35 @@ export default function HomePage() {
       {/* Categories */}
       <section className="py-24 bg-slate-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-slate-900 tracking-tighter">OUR PRODUCT CATEGORIES</h2>
-            <div className="h-2 w-20 bg-primary mx-auto" />
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div className="max-w-2xl">
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900 tracking-tighter">PRODUCT CATEGORIES</h2>
+              <p className="text-slate-600 text-lg">Explore our specialized range of plastic packaging solutions designed for durability and compliance.</p>
+            </div>
+            <div className="h-1 w-24 bg-primary rounded-full hidden md:block" />
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {categoriesLoading ? (
               [1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-80 bg-slate-200 animate-pulse rounded-lg" />
+                <div key={i} className="h-80 bg-slate-200 animate-pulse rounded-2xl" />
               ))
             ) : categories?.map((cat) => (
               <Link key={cat.id} href={`/products?category=${cat.name}`}>
-                <div className="group relative h-80 overflow-hidden cursor-pointer bg-slate-900 rounded-xl shadow-lg border border-slate-200">
+                <div className="group relative h-[400px] overflow-hidden cursor-pointer bg-slate-900 rounded-2xl shadow-xl border border-slate-200/50">
                   <img 
                     src={cat.image || `https://placehold.co/600x800/1e293b/ffffff?text=${cat.name}`} 
                     alt={cat.name}
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-700"
+                    className="w-full h-full object-cover opacity-50 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700"
                   />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                    <h3 className="text-2xl font-display font-bold text-white uppercase tracking-widest mb-4 group-hover:scale-110 transition-transform duration-500">
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80" />
+                  <div className="absolute inset-0 flex flex-col items-start justify-end p-8">
+                    <h3 className="text-3xl font-display font-bold text-white uppercase tracking-tighter mb-2 transform group-hover:-translate-y-2 transition-transform duration-500">
                       {cat.name}
                     </h3>
-                    <div className="h-1 w-0 group-hover:w-16 bg-primary transition-all duration-500" />
+                    <p className="text-slate-300 text-sm opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                      View full range <ArrowRight className="inline h-4 w-4 ml-1" />
+                    </p>
                   </div>
                 </div>
               </Link>
@@ -129,28 +154,28 @@ export default function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-24">
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-end mb-12">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-16 gap-6">
             <div>
-              <h2 className="text-4xl font-bold mb-2 text-slate-900 tracking-tighter">FEATURED PRODUCTS</h2>
-              <div className="h-2 w-20 bg-primary" />
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900 tracking-tighter">FEATURED SOLUTIONS</h2>
+              <p className="text-slate-600 text-lg max-w-xl">Our most sought-after products trusted by industry leaders across India.</p>
             </div>
             <Link href="/products">
-              <Button variant="outline" className="text-slate-900 border-slate-900 hover:bg-slate-900 hover:text-white rounded-none border-2">
-                VIEW CATALOG <ArrowRight className="ml-2 h-4 w-4" />
+              <Button variant="outline" className="text-slate-900 border-slate-200 hover:border-primary hover:text-primary rounded-full px-8 transition-all group">
+                VIEW FULL CATALOG <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
           </div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-96 bg-slate-100 animate-pulse rounded-lg" />
+                <div key={i} className="h-[450px] bg-slate-100 animate-pulse rounded-2xl" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {featuredProducts?.slice(0, 4).map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
