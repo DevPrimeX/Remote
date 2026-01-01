@@ -38,11 +38,11 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             className="max-w-2xl"
           >
-            <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 leading-tight">
-              PREMIUM PACKAGING <span className="text-primary">SOLUTIONS</span>
+            <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 leading-tight tracking-tighter">
+              RITESH <span className="text-primary">PLASTIC</span>
             </h1>
-            <p className="text-xl md:text-2xl text-slate-300 mb-8 font-light">
-              We manufacture high-quality, durable, and sustainable packaging for the food industry.
+            <p className="text-xl md:text-2xl text-slate-300 mb-8 font-light max-w-xl">
+              Leading manufacturer of high-quality pharmaceutical and industrial plastic packaging solutions in Baddi.
             </p>
             <div className="flex gap-4">
               <Link href="/products">
@@ -123,12 +123,12 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <h2 className="text-3xl font-bold mb-2 text-slate-900">FEATURED PRODUCTS</h2>
-              <div className="h-1 w-20 bg-primary" />
+              <h2 className="text-4xl font-bold mb-2 text-slate-900 tracking-tighter">FEATURED PRODUCTS</h2>
+              <div className="h-2 w-20 bg-primary" />
             </div>
             <Link href="/products">
-              <Button variant="ghost" className="text-primary hover:text-primary/80">
-                View All <ArrowRight className="ml-2 h-4 w-4" />
+              <Button variant="outline" className="text-slate-900 border-slate-900 hover:bg-slate-900 hover:text-white rounded-none border-2">
+                VIEW CATALOG <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>

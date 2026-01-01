@@ -26,7 +26,7 @@ export default function ProductDetailPage() {
   const { data: product, isLoading } = useProduct(id);
   const [emblaRef] = useEmblaCarousel();
   const [open, setOpen] = useState(false);
-  const WHATSAPP_NUMBER = "919876543210";
+  const WHATSAPP_NUMBER = "919882282826";
 
   const createInquiry = useCreateInquiry();
   
